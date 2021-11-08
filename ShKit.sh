@@ -127,7 +127,7 @@ function readFile() {
     # $1 is the file path
 
     FilePath="$1";
-    echo $(<$FilePath);
+    echo $(cat $FilePath);
     FilePath="";
 }
 
@@ -162,26 +162,70 @@ then
         echo $(mktemp -d);
     }
 
+    # set dictionary keys
     function setDictionaryKey() {
         # $1 is the dictionary, $2 is the key, $3 is the value
         echo "$3" > "$1/$2";
     }
 
+    # get dictionary keys
     function getDictionaryKey() {
         # $1 is the dictionary, $2 is the key
         echo $(readFile "$1/$2");
     }
 
+    # remove dictionary keys
     function remDictionaryKey() {
         # $1 is the dictionary, $2 is the key
         rm "$1/$2";
     }
 
+    # delete dictionary from enviorment and existence by snapping the infinity glove that thanos has.
     function delDictionary() {
         # $1 is th;e dictionary
         rm -r "$1"
     }
 fi
+
+# pager cat, this is a bad version of more
+function pgcat () {
+    # $1 is the file to be cat and paged, put $2 for the duration of the sleep and don't define it if you don't want sleep
+
+
+    if test $(isDefined $1) = "notdef"
+    then
+        die 1 "Argument not provided";
+    fi
+
+    Pgcat_n=1;
+
+    Pgcat_line="";
+
+    Pgcat_read="";
+
+    echo "pgcat, press [ENTER] to continue when paging.";
+    echo "";
+
+    while read line; do
+        # reading each line
+        echo $line
+
+
+        while true; do
+            read -n 1 -p "" < /dev/tty;
+            break
+        done
+        
+    done < $1;
+
+    echo "";
+    echo "EOF";
+
+    if test $(isDefined $2) = "def"
+    then
+        sleep $2;
+    fi
+}
 
 
 # say Hi on certain conditions
