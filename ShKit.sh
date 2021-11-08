@@ -27,7 +27,7 @@
 # Shel Utilities
 #
 # This file should be sourced, not runned. In fact, I used #!/bin/false to prevent standalone execution
-# These functions should be used with $(), like $Var = $(readFile filePath)
+# Some of hese functions should be used with $(), like $Var = $(readFile filePath)
 
 # base utilities
 
@@ -36,21 +36,47 @@ function isDefined() {
     # $1 is the variable to be tested
     if test -z "$1"
     then
-        echo "notdef"
+        echo "notdef";
     else
-        echo "def"
+        echo "def";
     fi
+}
+
+# clean the tmp directory
+function cleanTmp() {
+    # no parameters needed
+    rm -r /tmp/*;
+}
+
+# make script executable
+function ExecutableChmod() {
+    # $1 is the script to be made executable
+    chmod u+x "$1";
+}
+
+# error out
+function die() {
+    # $1 is the error code, $2 is the message
+
+    local code=$? now=$(date +%T.%N)
+    if [ "$1" -ge 0 ] 2>/dev/null; then  # assume $1 is an error code if numeric
+      code="$1"
+      shift
+    fi
+    echo "$0: ERROR at ${now%???}${1:+: $*}" >&2
+    exit $code
 }
 
 # get file extension
 function getFileExtension(){
     # $1 is the name of the file
-    echo ${$1%%.*}
+    echo ${$1%%.*};
 }
 
 # clear screen
 function cls(){
-    clear
+    # no parameters needed
+    clear;
 }
 
 # shell and process stuff
@@ -58,13 +84,13 @@ function cls(){
 # get shell path
 function getShellPath(){
     # no parameters needed
-    echo $(readlink /proc/$$/exe)
+    echo $(readlink /proc/$$/exe);
 }
 
 # get shell name
 function getShellName(){
     # no parameters needed
-    echo $(basename $(getShellPath))
+    echo $(basename $(getShellPath));
 }
 
 
@@ -74,17 +100,23 @@ function getCWD(){
 }
 
 # process stuff
+
+# get process shell path
 function getProcessShellPath(){
     # $1 is the process ID
-    echo $(readlink /proc/$1/exe)
+    echo $(readlink /proc/$1/exe);
 }
 
+# get process shell name
 function getProcessShellName(){
-    echo $(basename $(getProcessShellPath $1))
+    # $1 is the process ID
+    echo $(basename $(getProcessShellPath $1));
 }
 
+# get process current working directory
 function getProcessCWD(){
-    echo $(readlink /proc/$1/cwd)
+    # $1 is the process ID
+    echo $(readlink /proc/$1/cwd);
 }
 
 
@@ -120,6 +152,36 @@ function  randInt() {
     Count="";
 }
 
+# dictionaries
+
+if test $(isDefined $ShKit_NO_DICTIONARIES) = "notdef"
+then
+    # make new dictionary
+    function newDictionary() {
+        # no parameters needed
+        echo $(mktemp -d);
+    }
+
+    function setDictionaryKey() {
+        # $1 is the dictionary, $2 is the key, $3 is the value
+        echo "$3" > "$1/$2";
+    }
+
+    function getDictionaryKey() {
+        # $1 is the dictionary, $2 is the key
+        echo $(readFile "$1/$2");
+    }
+
+    function remDictionaryKey() {
+        # $1 is the dictionary, $2 is the key
+        rm "$1/$2";
+    }
+
+    function delDictionary() {
+        # $1 is th;e dictionary
+        rm -r "$1"
+    }
+fi
 
 
 # say Hi on certain conditions
@@ -132,5 +194,6 @@ fi
 BASH_SOURCE=".$0" # cannot be changed in bash
 if test ".$0" = ".$BASH_SOURCE"
 then
-    echo "I was not sourced, please source or embed me to use me."
+    echo "I was not sourced, please source or embed me to use me. I do not permit standalone execution of my self.";
+    die 1 "Standalone execution not permitted.";
 fi
