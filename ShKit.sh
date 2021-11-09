@@ -34,7 +34,7 @@
 # check if variable is defined
 function isDefined() {
     # $1 is the variable to be tested
-    if test -z "$1"
+    if test -z "$1";
     then
         echo "notdef";
     else
@@ -52,6 +52,11 @@ function cleanTmp() {
 function ExecutableChmod() {
     # $1 is the script to be made executable
     chmod u+x "$1";
+}
+
+# No operation function
+function NOOP() {
+    echo "a" > /dev/null;
 }
 
 # error out
@@ -138,7 +143,7 @@ function readFile() {
 function  randInt() {
     # $1 is the min number, $2 is the max number, $3 is the count and it is one if not provided
     Count="";
-    if test $(isDefined $3) = "def"
+    if test $(isDefined $3) = "def";
     then
         Count=$3
     else
@@ -187,12 +192,15 @@ then
     }
 fi
 
+
+# pagers
+
 # pager cat, this is a bad version of more
 function pgcat () {
     # $1 is the file to be cat and paged, put $2 for the duration of the sleep and don't define it if you don't want sleep
 
 
-    if test $(isDefined $1) = "notdef"
+    if test $(isDefined $1) = "notdef";
     then
         die 1 "Argument not provided";
     fi
@@ -221,22 +229,77 @@ function pgcat () {
     echo "";
     echo "EOF";
 
-    if test $(isDefined $2) = "def"
+    if test $(isDefined $2) = "def";
     then
         sleep $2;
     fi
 }
 
+function pgwrapp() {
+    # $@ is all of the arguments
+
+    if command -v "less" > /dev/null;
+    then
+        less $@;
+    elif command -v "more" > /dev/null;
+    then
+        more $@;
+    else
+        NOOP;
+    fi
+}
+
+
+# web stuff
+if test $(isDefined $ShKit_NO_WEB) = "notdef";
+then
+
+    # webrequest CLI, this function is a wrapper around curl, aria2 and wget
+    function webrequestCLI() {
+        # $@ is all of the arguments
+
+        if command -v "curl" > /dev/null;
+        then
+            curl $@;
+        elif command -v "wget" > /dev/null;
+        then
+            wget $@;
+        elif command -v "aria2c" > /dev/null;
+        then
+            aria2c $@;
+        else
+            NOOP;
+        fi
+    }
+
+    # webrequest /dev/tcp, request the web with /dev/tcp
+    function webrequestDevTCP() {
+        # $1 is the hostname, $2 is the port, define $3 if you want to use less
+
+        webrqDevTcp_content=$({ echo -e "GET / HTTP/1.0\r\nHost: www.google.com\r\n\r" >&3; cat <&3 ; } 3<> /dev/tcp/$1/$2);
+
+        echo "$webrqDevTcp_content";
+
+        if test $(isDefined $3);
+        then
+            webrqDevTcp_mktep=$(mktemp);
+            echo "$webrqDevTcp_content" > "$webrqDevTcp_mktep";
+            pgwrapp "$webrqDevTcp_mktep";
+            rm "$webrqDevTcp_mktep";
+        fi
+    }
+fi
+
 
 # say Hi on certain conditions
-if test $(isDefined "$ShKit_NO_SPEAK") = "notdef"
+if test $(isDefined "$ShKit_NO_SPEAK") = "notdef";
 then
     echo "Hi, I am ShKit. I am written by MXPSQL with shell script. Define the \$ShKit_NO_SPEAK variable if you want to tell me not to speak this message.";
 fi
 
 # check If I was sourced
-BASH_SOURCE=".$0" # cannot be changed in bash
-if test ".$0" = ".$BASH_SOURCE"
+BASH_SOURCE=".$0"; # cannot be changed in bash
+if test ".$0" = ".$BASH_SOURCE";
 then
     echo "I was not sourced, please source or embed me to use me. I do not permit standalone execution of my self.";
     die 1 "Standalone execution not permitted.";
