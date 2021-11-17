@@ -138,11 +138,20 @@ function readFile() {
 
 
 
-
+# random stuff
 # generate random number
 function  randInt() {
-    # $1 is the min number, $2 is the max number, $3 is the count and it is one if not provided
+    # $1 is the min number, $2 is the max number, $3 is the count and it is one if not provided, $4 is the seed and it is the unix epoch if not provided
     Count="";
+    TempSeed=$(mktemp)
+
+    echo $(date '+%s') > "$TempSeed";
+
+    if test $(isDefined $4) = "def";
+    then
+        echo "$4" > "$TempSeed";
+    fi
+
     if test $(isDefined $3) = "def";
     then
         Count=$3
@@ -155,6 +164,61 @@ function  randInt() {
     echo $RandIntRes;
     RandIntRes="";
     Count="";
+
+    rm "$TempSeed";
+}
+
+
+# generate random sequence of numbers
+# Warning: very slow and may not work most of the time
+function randSeq() {
+    # $1 is the max number, $2 is the min number, $3 is the min number for the increment,  $5 is the seed and it will use the unix epoch by default due to the random function using the unix epoch when not provided
+    rsMin=0;
+    rSMax=0;
+    rsIncMin="$3";
+    rsIncMax="$4";
+    rsInc=0;
+
+    rsCountDone="0";
+
+    if test $(isDefined $rsIncMin) = "notdef";
+    then
+        die 100 "argument 3 not provided";
+    fi
+
+    if test $(isDefined $rsIncMax) = "notdef";
+    then
+        die 100 "argument 4 not provided";
+    fi
+    
+    while true;
+    do
+        if test "$rsCountDone" = "0";
+        then
+            while true;
+            do
+                rsMin=$(randInt $1 $2 1 $5);
+                rsMax=$(randInt $1 $2 1 $5);
+                if test $rsMax -gt $rsMin;
+                then
+                    rsCountDone="1";
+                    break
+                fi
+            done
+        fi
+
+        rsInc=$(randInt $rsIncMin $rsIncMax 1 $5);
+
+        if test $rsInc -ge $rsMin || test $rsInc -eq $rsMin;
+        then
+            break;
+        fi
+    done
+
+
+    echo $(seq $rsMin $rsInc $rsMax);
+
+
 }
 
 # dictionaries
