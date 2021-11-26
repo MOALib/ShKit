@@ -42,6 +42,11 @@ function isDefined() {
     fi
 }
 
+# fsplice will remove the first element from string separated by space
+function fsplice(){
+    echo $(echo "$@" | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}');
+}
+
 # clean the tmp directory
 function cleanTmp() {
     # no parameters needed
