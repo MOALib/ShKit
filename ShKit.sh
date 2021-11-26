@@ -54,9 +54,11 @@ function ExecutableChmod() {
     chmod u+x "$1";
 }
 
-# No operation function
+# No operation function, does not change the status code
 function NOOP() {
+    RET=$?
     echo "a" > /dev/null;
+    return $RET
 }
 
 # error out
