@@ -42,9 +42,21 @@ function isDefined() {
     fi
 }
 
+# No operation function, does not change the status code
+function NOOP() {
+    RET=$?
+    echo "a" > /dev/null;
+    return $RET
+}
+
 # fsplice will remove the first element from string separated by space
 function fsplice(){
-    echo $(echo "$@" | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}');
+    if test "$#" -le 1;
+    then
+        NOOP;
+    else
+        echo $(echo "$@" | awk '{for (i=2; i<NF; i++) printf $i " "; print $NF}');
+    fi
 }
 
 # clean the tmp directory
@@ -57,13 +69,6 @@ function cleanTmp() {
 function ExecutableChmod() {
     # $1 is the script to be made executable
     chmod u+x "$1";
-}
-
-# No operation function, does not change the status code
-function NOOP() {
-    RET=$?
-    echo "a" > /dev/null;
-    return $RET
 }
 
 # error out
