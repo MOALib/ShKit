@@ -255,6 +255,18 @@ then
         echo $(readFile "$1/$2");
     }
 
+    # check if dictionary keys exists
+    function dictionaryKeyStatus(){
+        # $1 is the dictionary, $2 is the key
+
+        if test -e "$1/$2";
+        then
+            echo "yes";
+        else
+            echo "no";
+        fi
+    }
+
     # remove dictionary keys
     function remDictionaryKey() {
         # $1 is the dictionary, $2 is the key
